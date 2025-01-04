@@ -47,7 +47,6 @@ class GardenController:
         return self.main_valve
     
     def start_monitoring(self, log_interval=60):
-        print("global m started")
         self.monitoring = threading.Thread(target=self._start_monitoring, args=(log_interval,))
         self.monitoring.start()
 

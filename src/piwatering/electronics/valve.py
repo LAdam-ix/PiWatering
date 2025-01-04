@@ -11,7 +11,6 @@ class Valve(OutputDevice):
         self.db_api = db_api
         self.is_open = False
 
-
     def open(self):
         if self.db_api:
             point_open = Point("valve_status") \
@@ -45,7 +44,7 @@ class Valve(OutputDevice):
             self.close()
         else:
             self.open()
-            
+
     def start_timer(self, duration_seconds):
         if not self.timer_running:
             timer_thread = Thread(target=self._timer_function, args=(duration_seconds,))
