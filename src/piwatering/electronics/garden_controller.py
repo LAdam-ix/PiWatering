@@ -6,7 +6,7 @@ class GardenController:
     def __init__(self):
         self.circuits = []
         ## for futere sensors that will monitor 
-        ## if its raingin and the level of the water in the tank
+        ## if it's raining and the level of the water in the tank
         self.special_sensors = []
         self.main_valve = None
         self.monitoring = None
@@ -47,6 +47,7 @@ class GardenController:
         return self.main_valve
     
     def start_monitoring(self, log_interval=60):
+        print("global m started")
         self.monitoring = threading.Thread(target=self._start_monitoring, args=(log_interval,))
         self.monitoring.start()
 

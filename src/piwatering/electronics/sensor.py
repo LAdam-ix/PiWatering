@@ -1,4 +1,4 @@
-from src.piwatering.config import SENSOR_MAX, SENSOR_MIN
+from config import SENSOR_MAX, SENSOR_MIN
 from gpiozero import MCP3008
 
 class Sensor:
@@ -9,14 +9,12 @@ class Sensor:
 
     def read_raw_value(self):
         return self.sensor.value
-    
+
     def read_value(self):
-        ## this is value when the sensor pin is unused(gronded)
+        ## this is value when the sensor pin is unused(gronded)        
         if 0.000489 == round(self.sensor.value, 6):
             return 0
-        
-        return (self.sensor.value - SENSOR_MAX) * (-100) / (SENSOR_MIN - SENSOR_MAX)
-
+        return 100 - (self.sensor.value - SENSOR_MAX) * (100) / (SENSOR_MIN - SENSOR_MAX)
 
     def is_active(self):
         return self.read_value() > self.threshold

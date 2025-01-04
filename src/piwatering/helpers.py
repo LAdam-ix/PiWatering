@@ -12,6 +12,3 @@ def create_buckets(client, components, retention_days=None):
         else:
            print(f"Bucket '{bucket_name}' already exists.")
 
-
-
-

@@ -5,13 +5,13 @@ from electronics.valve import Valve
 from electronics.circuit_controller import CircuitController
 from electronics.garden_controller import GardenController
 from electronics.sensor import Sensor
-from electronics.pinout import RELAY1, RELAY7, RELAY8, CLOCK, MOSI, MISO, SELECT
+from electronics.pinout import RELAY1, RELAY2, RELAY7, CLOCK, MOSI, MISO, SELECT
 from helpers import create_buckets
 
 # Define the web refresh interval in seconds
 REFRESH_INTERVAL = 2
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='./../../templates')
 app.secret_key = "your_secret_key"
  
 client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
@@ -24,8 +24,8 @@ garden_controller = GardenController()
 circuit1 = CircuitController(name="GRASS", database=write_api)
 circuit2 = CircuitController(name="GARDEN", database=write_api)
 
-circuit1.add_valve(Valve(name="Valve 1.1", pin=RELAY1))
-circuit2.add_valve(Valve(name="Valve 2.1", pin=RELAY8))
+circuit1.add_valve(Valve(name="Valve 1.1", db_api=write_api, pin=RELAY1))
+circuit2.add_valve(Valve(name="Valve 2.1", db_api=write_api, pin=RELAY2))
 
 soil_sensor_1 = Sensor(
     name="Soil Channel 0",
@@ -59,6 +59,7 @@ soil_sensor_3 = Sensor(
     miso=MISO,
     select=SELECT,
 )
+
 ## Currently not used; just for testing
 soil_sensor_4 = Sensor(
     name="Soil Channel 3",
@@ -95,7 +96,7 @@ def index():
     garden_controller.check_special_sensors()
     garden_html = garden_controller.get_html()
     return render_template(
-        "../template/index.html",
+        "index.html",
         garden_html=garden_html,
         refresh_interval=REFRESH_INTERVAL,
         garden_controller=garden_controller,
@@ -122,9 +123,10 @@ def open_valve(circuit_name, valve_name):
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
         if valve:
-            valve.open()  
+            valve.open()
             flash(f"{valve_name} opened in {circuit_name}.")
     return redirect(url_for("index"))
+
 
 @app.route("/<circuit_name>/<valve_name>/close_valve", methods=["POST"])
 def close_valve(circuit_name, valve_name):
@@ -132,10 +134,9 @@ def close_valve(circuit_name, valve_name):
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
         if valve:
-            valve.close() 
+            valve.close()
             flash(f"{valve_name} closed in {circuit_name}.")
     return redirect(url_for("index"))
-
 
 
 @app.route("/<circuit_name>/<valve_name>/start_timer", methods=["POST"])

@@ -4,7 +4,7 @@ RELAY3 = None
 RELAY4 = None
 RELAY5 = None
 RELAY6 = None
-RELAY7 = None
+RELAY7 = 4
 RELAY8 = None
 
 RED_TEST_LED = 19

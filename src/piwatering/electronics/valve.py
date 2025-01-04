@@ -4,12 +4,13 @@ from threading import Thread
 from influxdb_client import Point,WritePrecision
 
 class Valve(OutputDevice):
-    def __init__(self, name, pin, db_api=None, active_high=True, initial_value=False):
+    def __init__(self, name, pin, db_api=None, active_high=False, initial_value=False):
         super().__init__(pin, active_high=active_high, initial_value=initial_value)
         self.name = name
         self.timer_running = False
         self.db_api = db_api
         self.is_open = False
+
 
     def open(self):
         if self.db_api:
@@ -24,7 +25,6 @@ class Valve(OutputDevice):
         print(f'{self.name} opened')
         self.is_open = True
         self.on()
-        
 
     def close(self):
         if self.db_api:
@@ -76,4 +76,3 @@ class Valve(OutputDevice):
             <hr>
         </div>
     '''
-
