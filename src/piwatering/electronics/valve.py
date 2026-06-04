@@ -9,7 +9,6 @@ class Valve(OutputDevice):
         self.name = name
         self.timer_running = False
         self.db_api = db_api
-        self.is_open = False
 
     def open(self):
         if self.db_api:
@@ -22,7 +21,6 @@ class Valve(OutputDevice):
             except Exception as e:
                 print(f"Error writing to InfluxDB: {e}")
         print(f'{self.name} opened')
-        self.is_open = True
         self.on()
 
     def close(self):
@@ -37,13 +35,6 @@ class Valve(OutputDevice):
                 print(f"Error writing to InfluxDB: {e}")
         print(f'{self.name} closed')
         self.off()
-        self.is_open = False
-
-    def activate_valve(self):
-        if self.is_open:
-            self.close()
-        else:
-            self.open()
 
     def start_timer(self, duration_seconds):
         if not self.timer_running:

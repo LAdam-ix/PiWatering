@@ -6,15 +6,20 @@ class Sensor:
         self.name = name
         self.sensor = MCP3008(channel=channel, clock_pin=clock, mosi_pin=mosi, miso_pin=miso, select_pin=select)
         self.threshold = threshold
+        self.i = 0
 
     def read_raw_value(self):
         return self.sensor.value
 
     def read_value(self):
-        ## this is value when the sensor pin is unused(gronded)        
+        # print(round(self.sensor.value, 6))
         if 0.000489 == round(self.sensor.value, 6):
             return 0
         return 100 - (self.sensor.value - SENSOR_MAX) * (100) / (SENSOR_MIN - SENSOR_MAX)
+
+
+
+
 
     def is_active(self):
         return self.read_value() > self.threshold

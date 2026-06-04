@@ -1,5 +1,7 @@
+
+
 from config import INFLUX_URL, INFLUX_ORG, INFLUX_TOKEN
-from influxdb_client import InfluxDBClient, WriteOptions
+from influxdb_client import InfluxDBClient, WritePrecision, WriteOptions
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from electronics.valve import Valve
 from electronics.circuit_controller import CircuitController
@@ -7,9 +9,6 @@ from electronics.garden_controller import GardenController
 from electronics.sensor import Sensor
 from electronics.pinout import RELAY1, RELAY2, RELAY7, CLOCK, MOSI, MISO, SELECT
 from helpers import create_buckets
-
-# Define the web refresh interval in seconds
-REFRESH_INTERVAL = 2
 
 app = Flask(__name__, template_folder='./../../templates')
 app.secret_key = "your_secret_key"
@@ -19,14 +18,21 @@ write_api = client.write_api(
     write_options=WriteOptions(batch_size=1000, flush_interval=1000)
 )
 
-garden_controller = GardenController()
+# Define the refresh interval in seconds
+REFRESH_INTERVAL = 2
 
+# Initialize GardenController and add circuits
+garden_controller = GardenController(30)
+
+# Initialize circuits
 circuit1 = CircuitController(name="GRASS", database=write_api)
 circuit2 = CircuitController(name="GARDEN", database=write_api)
 
+# Add valves to circuits using the correct relay pins
 circuit1.add_valve(Valve(name="Valve 1.1", db_api=write_api, pin=RELAY1))
 circuit2.add_valve(Valve(name="Valve 2.1", db_api=write_api, pin=RELAY2))
 
+# Add soil and rain sensors to circuits with MCP3008 configuration
 soil_sensor_1 = Sensor(
     name="Soil Channel 0",
     channel=0,
@@ -36,8 +42,6 @@ soil_sensor_1 = Sensor(
     miso=MISO,
     select=SELECT,
 )
-
-## Currently not used; just for testing
 soil_sensor_2 = Sensor(
     name="Soil Channel 1",
     channel=1,
@@ -59,8 +63,6 @@ soil_sensor_3 = Sensor(
     miso=MISO,
     select=SELECT,
 )
-
-## Currently not used; just for testing
 soil_sensor_4 = Sensor(
     name="Soil Channel 3",
     channel=3,
@@ -73,14 +75,15 @@ soil_sensor_4 = Sensor(
 circuit2.add_sensor(soil_sensor_3)
 circuit2.add_sensor(soil_sensor_4)
 
+# Add circuits to garden
 garden_controller.add_circuit(circuit1)
 garden_controller.add_circuit(circuit2)
 
-## Add main vavle for emergency stop
+# Optionally add main valve
 main_valve = Valve(name="Main Valve", pin=RELAY7)
 garden_controller.set_main_valve(main_valve)
 
-## Check if db bucket exist if not create
+## Check if bucket exist if not create
 buckets_names = ["Valves"]
 for circuit in garden_controller.circuits:
     buckets_names.append(f"{circuit.name}_h_sensors")
@@ -88,13 +91,16 @@ for circuit in garden_controller.circuits:
 
 create_buckets(client, buckets_names )
 
-## start db logging
+
 garden_controller.start_monitoring()
 
 @app.route("/")
 def index():
     garden_controller.check_special_sensors()
     garden_html = garden_controller.get_html()
+    import os
+    cwd = os.getcwd()
+    print(cwd)
     return render_template(
         "index.html",
         garden_html=garden_html,
@@ -113,9 +119,8 @@ def activate_main_valve():
 @app.route("/main/sensor_statuses", methods=["GET"])
 def main_sensor_statuses():
     statuses = {}
-    statuses = garden_controller.check_main_sensors()
+    # statuses = garden_controller.check_main_sensors()
     return jsonify(statuses)
-
 
 @app.route("/<circuit_name>/<valve_name>/open_valve", methods=["POST"])
 def open_valve(circuit_name, valve_name):
@@ -123,17 +128,19 @@ def open_valve(circuit_name, valve_name):
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
         if valve:
+            print("opening")
             valve.open()
             flash(f"{valve_name} opened in {circuit_name}.")
     return redirect(url_for("index"))
-
 
 @app.route("/<circuit_name>/<valve_name>/close_valve", methods=["POST"])
 def close_valve(circuit_name, valve_name):
     circuit = garden_controller.get_circuit_by_name(circuit_name)
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
+        print(valve)        
         if valve:
+            print("closing")
             valve.close()
             flash(f"{valve_name} closed in {circuit_name}.")
     return redirect(url_for("index"))
@@ -152,6 +159,7 @@ def start_timer(circuit_name, valve_name):
             valve.start_timer(int(duration_seconds))
             flash(f"Timer started for {valve_name} in {circuit_name}.")
     return redirect(url_for("index"))
+
 
 
 @app.route("/<circuit_name>/sensor_statuses", methods=["GET"])

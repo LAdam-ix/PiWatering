@@ -1,6 +1,8 @@
 import time
 from influxdb_client import Point, WritePrecision, WriteOptions
 
+from config import SENSOR_MAX, SENSOR_MIN
+
 class CircuitController:
     def __init__(self, name, database):
         self.name = name
@@ -54,6 +56,7 @@ class CircuitController:
 
     def save_to_db(self):
         for sensor in self.sensors:
+            print("saviong",sensor.name)
             raw_value = float(sensor.read_raw_value())
             value = float(sensor.read_value())
             cur_time = time.time_ns() 
