@@ -1,38 +1,23 @@
 from gpiozero import OutputDevice
 import time
 from threading import Thread
-from influxdb_client import Point,WritePrecision
+
+from db import write
+
 
 class Valve(OutputDevice):
-    def __init__(self, name, pin, db_api=None, active_high=False, initial_value=False):
+    def __init__(self, name, pin, active_high=False, initial_value=False):
         super().__init__(pin, active_high=active_high, initial_value=initial_value)
         self.name = name
         self.timer_running = False
-        self.db_api = db_api
 
     def open(self):
-        if self.db_api:
-            point_open = Point("valve_status") \
-                .tag("valve_id", self.name) \
-                .field("state", 1) \
-                .time(time.time_ns(),WritePrecision.NS)
-            try:
-                self.db_api.write(record=point_open, bucket="Valves")
-            except Exception as e:
-                print(f"Error writing to InfluxDB: {e}")
+        write("valve_state", {"valve": self.name}, {"value": 1})
         print(f'{self.name} opened')
         self.on()
 
     def close(self):
-        if self.db_api:
-            point_close = Point("valve_status") \
-                .tag("valve_id", self.name) \
-                .field("state", 0) \
-               .time(time.time_ns(), WritePrecision.NS)
-            try:
-                self.db_api.write(record=point_close, bucket="Valves") 
-            except Exception as e:
-                print(f"Error writing to InfluxDB: {e}")
+        write("valve_state", {"valve": self.name}, {"value": 0})
         print(f'{self.name} closed')
         self.off()
 

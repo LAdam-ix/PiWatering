@@ -1,14 +1,11 @@
-import time
-from influxdb_client import Point, WritePrecision, WriteOptions
+from db import write
 
-from config import SENSOR_MAX, SENSOR_MIN
 
 class CircuitController:
-    def __init__(self, name, database):
+    def __init__(self, name):
         self.name = name
         self.valves = []
         self.sensors = []
-        self.db_api = database
 
     def add_valve(self, valve):
         self.valves.append(valve)
@@ -18,19 +15,17 @@ class CircuitController:
 
     def activate_all_valves(self):
         for valve in self.valves:
-            valve.activate_valve()
+            valve.open()
 
     def deactivate_all_valves(self):
         for valve in self.valves:
-            valve.valve.off()
+            valve.close()
 
     def get_sensors_html(self):
-        sensors_html = ''.join([sensor.get_html() for sensor in self.sensors])
-        return sensors_html
+        return ''.join([sensor.get_html() for sensor in self.sensors])
 
     def get_valves_html(self):
-        valve_html = ''.join([valve.get_html() for valve in self.valves])
-        return valve_html
+        return ''.join([valve.get_html() for valve in self.valves])
 
     def get_html(self):
         sensors_html = self.get_sensors_html()
@@ -48,25 +43,12 @@ class CircuitController:
         '''
 
     def check_sensors(self):
-        sensor_statuses = {}
-        for sensor in self.sensors:
-            sensor_statuses[sensor.name] = sensor.is_active()
-        return sensor_statuses
-
+        return {sensor.name: sensor.is_active() for sensor in self.sensors}
 
     def save_to_db(self):
         for sensor in self.sensors:
-            print("saviong",sensor.name)
-            raw_value = float(sensor.read_raw_value())
-            value = float(sensor.read_value())
-            cur_time = time.time_ns() 
-            point1 = Point("sensor") \
-                .tag("sensor", sensor.name) \
-                .field("value", raw_value) \
-                .time(cur_time, WritePrecision.NS)
-            point2 = Point("sensor") \
-                .tag("sensor", sensor.name) \
-                .field("value", value) \
-                .time(cur_time, WritePrecision.NS)
-            self.db_api.write(bucket=f"{self.name}_raw_sensors", record=point1)
-            self.db_api.write(bucket=f"{self.name}_h_sensors",  record=point2)
+            write(
+                "soil_moisture",
+                {"circuit": self.name, "sensor": sensor.name},
+                {"raw": float(sensor.read_raw_value()), "percent": float(sensor.read_value())},
+            )

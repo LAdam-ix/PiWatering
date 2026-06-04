@@ -1,23 +1,16 @@
 
 
-from config import INFLUX_URL, INFLUX_ORG, INFLUX_TOKEN
-from influxdb_client import InfluxDBClient, WritePrecision, WriteOptions
+from config import FLASK_SECRET_KEY
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from electronics.valve import Valve
 from electronics.circuit_controller import CircuitController
 from electronics.garden_controller import GardenController
 from electronics.sensor import Sensor
 from electronics.pinout import RELAY1, RELAY2, RELAY7, CLOCK, MOSI, MISO, SELECT
-from helpers import create_buckets
 
 app = Flask(__name__, template_folder='./../../templates')
-app.secret_key = "your_secret_key"
+app.secret_key = FLASK_SECRET_KEY
  
-client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
-write_api = client.write_api(
-    write_options=WriteOptions(batch_size=1000, flush_interval=1000)
-)
-
 # Define the refresh interval in seconds
 REFRESH_INTERVAL = 2
 
@@ -25,12 +18,12 @@ REFRESH_INTERVAL = 2
 garden_controller = GardenController(30)
 
 # Initialize circuits
-circuit1 = CircuitController(name="GRASS", database=write_api)
-circuit2 = CircuitController(name="GARDEN", database=write_api)
+circuit1 = CircuitController(name="GRASS")
+circuit2 = CircuitController(name="GARDEN")
 
 # Add valves to circuits using the correct relay pins
-circuit1.add_valve(Valve(name="Valve 1.1", db_api=write_api, pin=RELAY1))
-circuit2.add_valve(Valve(name="Valve 2.1", db_api=write_api, pin=RELAY2))
+circuit1.add_valve(Valve(name="Valve 1.1", pin=RELAY1))
+circuit2.add_valve(Valve(name="Valve 2.1", pin=RELAY2))
 
 # Add soil and rain sensors to circuits with MCP3008 configuration
 soil_sensor_1 = Sensor(
@@ -83,24 +76,12 @@ garden_controller.add_circuit(circuit2)
 main_valve = Valve(name="Main Valve", pin=RELAY7)
 garden_controller.set_main_valve(main_valve)
 
-## Check if bucket exist if not create
-buckets_names = ["Valves"]
-for circuit in garden_controller.circuits:
-    buckets_names.append(f"{circuit.name}_h_sensors")
-    buckets_names.append(f"{circuit.name}_raw_sensors")
-
-create_buckets(client, buckets_names )
-
-
 garden_controller.start_monitoring()
 
 @app.route("/")
 def index():
-    garden_controller.check_special_sensors()
+    garden_controller.check_main_sensors()
     garden_html = garden_controller.get_html()
-    import os
-    cwd = os.getcwd()
-    print(cwd)
     return render_template(
         "index.html",
         garden_html=garden_html,
@@ -111,7 +92,7 @@ def index():
 
 @app.route("/main/activate_valve", methods=["POST"])
 def activate_main_valve():
-    garden_controller.get_main_valve().activate_valve()
+    garden_controller.get_main_valve().open()
     flash("Main valve activated.")
     return redirect(url_for("index"))
 
@@ -128,7 +109,6 @@ def open_valve(circuit_name, valve_name):
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
         if valve:
-            print("opening")
             valve.open()
             flash(f"{valve_name} opened in {circuit_name}.")
     return redirect(url_for("index"))
@@ -138,9 +118,7 @@ def close_valve(circuit_name, valve_name):
     circuit = garden_controller.get_circuit_by_name(circuit_name)
     if circuit:
         valve = next((v for v in circuit.valves if v.name == valve_name), None)
-        print(valve)        
         if valve:
-            print("closing")
             valve.close()
             flash(f"{valve_name} closed in {circuit_name}.")
     return redirect(url_for("index"))
