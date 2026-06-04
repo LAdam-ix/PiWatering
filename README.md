@@ -14,6 +14,17 @@ In its current state, the project serves as a foundation for further development
 - Database integration for saving information.
 - Simple test web interface for basic interaction.
 
+- **Run with PDM:**
+  1. Install dependencies with `pdm install`.
+  2. Start the application using `pdm start`.
+
+- **Run with Included Virtual Environment:**
+
+  **(NON STANDART INCLUDED EXTRA FOR SEMINAR PROJECT)**
+  1. Use the included `.venv` directory:
+     - Navigate to the project root.
+     - Run the application with `.venv/bin/python3 src/piwatering/app.py`.
+
 ---
 
 ## **Future Upgrades - TODO List**
