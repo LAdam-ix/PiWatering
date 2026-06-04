@@ -1,246 +1,76 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Garden Control</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 90%;
-            margin: 0 auto;
-        }
-        .section {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        .section h2 {
-            margin-top: 0;
-        }
-        .sensor, .valve {
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
-            margin-bottom: 10px;
-        }
-        .sensor:last-child, .valve:last-child {
-            border-bottom: none;
-        }
-        .sensor span, .valve span {
-            display: inline-block;
-            margin-left: 10px;
-        }
-        .flash {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-        .flash.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .flash.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .flash.warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:disabled {
-            background-color: #6c757d;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .valve-controls {
-            display: flex;
-            gap: 10px;
-        }
-        .warning {
-            color: red;
-        }
-        input[type="number"] {
-            padding: 5px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            const refreshInterval = {{ refresh_interval }} * 1000; // Convert to milliseconds
-
-            function updateSensorStatuses(circuit_name) {
-                $.ajax({
-                    url: `/${circuit_name}/sensor_statuses`,
-                    method: 'GET',
-                    success: function(data) {
-                        for (let sensor in data) {
-                            const sensorId = sensor.replace(' ', '_');
-                            $(`#${sensorId}_status`).text(data[sensor].active ? 'Active' : 'Inactive');
-                            $(`#${sensorId}_raw_value`).text(data[sensor].raw_value);
-                            $(`#${sensorId}_h_value`).text(data[sensor].h_value);
-                        }
-                    }
-                });
-            }
-
-            function activateMainValve() {
-                $.ajax({
-                    url: '/main/activate_valve',
-                    method: 'POST',
-                    success: function(response) {
-                        alert('Main valve activated.');
-                        updateSensorStatuses('main');
-                    }
-                });
-            }
-
-            function handleValveControl(event) {
-                const button = $(this);
-                const url = button.data('url');
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    success: function(response) {
-                        alert(response.message);
-                        updateSensorStatuses(button.data('circuit'));
-                    }
-                });
-            }
-
-            // Event listeners
-            function handleFormSubmit(event) {
-                event.preventDefault();
-                const form = $(this);
-                const url = form.attr('action');
-                const data = form.serialize();
-
-                $.ajax({
-                    url: url,
-                    method: 'POST',
-                    data: data,
-                    success: function(response) {
-                        alert(response.message);
-                        updateSensorStatuses(form.data('circuit'));
-                    }
-                });
-            }
-        
-            function startTimer(button) {
-                const form = button.closest('form');
-                $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
-                    data: form.serialize(),
-                    success: function(response) {
-                        updateSensorStatuses(button.data('circuit')); // Refresh sensor data
-                    }
-                });
-            }
-            $("form").on("submit", handleFormSubmit);
-            $("button.start-timer").on("click", function() {
-                startTimer($(this));
-            });
-            $("button#activate-main-valve").on("click", activateMainValve);
-
-            $("button.valve-control").on("click", handleValveControl);
-
-            // Initial load and periodic refresh
-            {% for circuit in garden_controller.circuits %}
-            updateSensorStatuses('{{ circuit.name }}'); // Initial load
-            setInterval(function() {
-                updateSensorStatuses('{{ circuit.name }}');
-            }, refreshInterval); // Refresh every refreshInterval milliseconds
-            {% endfor %}
-
-            // Initial load and periodic refresh for main sensors
-            updateSensorStatuses('main');
-            setInterval(function() {
-                updateSensorStatuses('main');
-            }, refreshInterval);
-        });
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PiWater Control</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; background: #f4f5f4; color: #222; }
+    header { background: #2e7d32; color: #fff; padding: 14px 16px; font-size: 18px; font-weight: 600; }
+    .wrap { max-width: 560px; margin: 0 auto; padding: 12px; }
+    .valve { background: #fff; border-radius: 12px; padding: 14px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .valve.unwired { opacity: .55; }
+    .row { display: flex; align-items: center; justify-content: space-between; }
+    .name { font-weight: 600; font-size: 16px; }
+    .state { font-size: 13px; color: #777; }
+    .btns { display: flex; gap: 8px; margin-top: 10px; }
+    button { flex: 1; padding: 11px; border: 0; border-radius: 8px; font-size: 15px; color: #fff; cursor: pointer; }
+    .on { background: #2e7d32; } .off { background: #c62828; }
+    .timer { background: #1565c0; } .stop { background: #ef6c00; }
+    .timerrow { display: flex; gap: 8px; margin-top: 8px; }
+    .timerrow input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Garden Control Interface</h1>
-        <div>
-            {% with messages = get_flashed_messages(with_categories=True) %}
-                {% if messages %}
-                    <div class="flash">
-                        {% for category, message in messages %}
-                            <div class="{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-        </div>
-        <div class="section">
-            <h2>Main Valve Control</h2>
-            <button id="activate-main-valve">Activate Main Valve</button>
-        </div>
-        <div class="section">
-            <h2>Main Sensors</h2>
-            {% for sensor in garden_controller.main_sensors %}
-                <div class="sensor">
-                    <strong>{{ sensor.name }}:</strong>
-                    <span id="{{ sensor.name.replace(' ', '_') }}_status">Checking...</span>
-                    <span id="{{ sensor.name.replace(' ', '_') }}_raw_value"></span>
-                    <span id="{{ sensor.name.replace(' ', '_') }}_h_value"></span>
-                </div>
-            {% endfor %}
-        </div>
-        <div>
-            {% for circuit in garden_controller.circuits %}
-                <div class="section">
-                    <h2>{{ circuit.name }}</h2>
-                    <div class="section">
-                        <h3>Sensors</h3>
-                        {% for sensor in circuit.sensors %}
-                            <div class="sensor">
-                                <strong>{{ sensor.name }}:</strong>
-                                <span id="{{ sensor.name.replace(' ', '_') }}_status">Checking...</span>
-                                <span id="{{ sensor.name.replace(' ', '_') }}_raw_value"></span>
-                                <span id="{{ sensor.name.replace(' ', '_') }}_h_value"></span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="section">
-                        <h3>Valves</h3>
-                        {% for valve in circuit.valves %}
-                            <div class="valve">
-                                <strong>{{ valve.name }}</strong>
-                                <form action="/{{ circuit.name }}/{{ valve.name }}/start_timer" method="post" data-circuit="{{ circuit.name }}">
-                                    <input type="number" name="duration" placeholder="Duration (seconds)" required>
-                                    <button type="submit" class="start-timer">Start Timer</button>
-                                </form>
-                                <div class="valve-controls">
-                                    <button class="valve-control" data-url="/{{ circuit.name }}/{{ valve.name }}/open_valve" data-circuit="{{ circuit.name }}">On</button>
-                                    <button class="valve-control" data-url="/{{ circuit.name }}/{{ valve.name }}/close_valve" data-circuit="{{ circuit.name }}">Off</button>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+  <header>PiWater · Control</header>
+  <div class="wrap">
+    {% for v in garden.zones() %}
+    <div class="valve {% if not v.wired %}unwired{% endif %}" data-valve="{{ v.name }}">
+      <div class="row">
+        <span class="name">{{ v.name }}</span>
+        <span class="state">…</span>
+      </div>
+      <div class="btns">
+        <button class="on" onclick="act(this,'open')">On</button>
+        <button class="off" onclick="act(this,'close')">Off</button>
+      </div>
+      <div class="timerrow">
+        <input type="number" min="1" name="duration" placeholder="seconds">
+        <button class="timer" onclick="startTimer(this)">Timer</button>
+        <button class="stop" onclick="stopTimer(this)">Stop</button>
+      </div>
     </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    const REFRESH = {{ refresh_interval }} * 1000;
+    const card = el => el.closest('.valve');
+    const vname = el => card(el).dataset.valve;
+
+    async function post(name, path, body) {
+      await fetch(`/valve/${encodeURIComponent(name)}/${path}`, { method: 'POST', body });
+      refresh();
+    }
+    async function act(btn, action) { await post(vname(btn), action); }
+    async function startTimer(btn) {
+      const dur = card(btn).querySelector('input[name=duration]').value;
+      if (dur) await post(vname(btn), 'timer', new URLSearchParams({ duration: dur }));
+    }
+    async function stopTimer(btn) { await post(vname(btn), 'timer/stop'); }
+
+    async function refresh() {
+      const data = await (await fetch('/valves/status')).json();
+      document.querySelectorAll('.valve').forEach(c => {
+        const s = data[c.dataset.valve];
+        if (!s) return;
+        let txt = !s.wired ? 'not wired' : (s.open ? 'OPEN' : 'closed');
+        if (s.timer_remaining > 0) txt += ` · ${s.timer_remaining}s left`;
+        c.querySelector('.state').textContent = txt;
+      });
+    }
+    refresh();
+    setInterval(refresh, REFRESH);
+  </script>
 </body>
 </html>

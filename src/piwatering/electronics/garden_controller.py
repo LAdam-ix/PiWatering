@@ -1,50 +1,34 @@
 import threading
 import time
 
+from db import write
+
 
 class GardenController:
     def __init__(self, log_interval=60):
-        self.circuits = []
-        self.main_sensors = []      # garden-level sensors (e.g. water-level) - planned
-        self.main_valve = None      # special master shutoff (normally open)
+        self.valves = []
+        self.sensors = []           # flat; planned/inactive for now
         self._log_interval = log_interval
         self._monitor_thread = None
 
-    def add_circuit(self, circuit):
-        self.circuits.append(circuit)
+    def add_valve(self, valve):
+        self.valves.append(valve)
 
-    def add_main_sensor(self, sensor):
-        self.main_sensors.append(sensor)
-
-    def set_main_valve(self, valve):
-        self.main_valve = valve
-
-    def deactivate_all_valves(self):
-        if self.main_valve:
-            self.main_valve.close()
-        for circuit in self.circuits:
-            circuit.deactivate_all_valves()
-
-    def check_main_sensors(self):
-        # Emergency shutoff: if any garden-level sensor is active, stop all water
-        for sensor in self.main_sensors:
-            if sensor.is_active():
-                self.deactivate_all_valves()
-                break
-
-    def get_html(self):
-        circuit_html = ''.join([circuit.get_html() for circuit in self.circuits])
-        main_valve_html = self.main_valve.get_html() if self.main_valve else ''
-        return main_valve_html + circuit_html
-
-    def get_circuit_by_name(self, name):
-        for circuit in self.circuits:
-            if circuit.name == name:
-                return circuit
+    def get_valve(self, name):
+        for v in self.valves:
+            if v.name == name:
+                return v
         return None
 
-    def get_main_valve(self):
-        return self.main_valve
+    def zones(self):
+        return [v for v in self.valves if v.role == "zone"]
+
+    def sources(self):
+        return [v for v in self.valves if v.role == "source"]
+
+    def deactivate_all_valves(self):
+        for v in self.valves:
+            v.close()
 
     def start_monitoring(self, log_interval=None):
         interval = self._log_interval if log_interval is None else log_interval
@@ -53,8 +37,12 @@ class GardenController:
         )
         self._monitor_thread.start()
 
-    def _monitor_loop(self, time_interval):
+    def _monitor_loop(self, interval):
         while True:
-            for circuit in self.circuits:
-                circuit.save_to_db()
-            time.sleep(time_interval)
+            for s in self.sensors:
+                write(
+                    "soil_moisture",
+                    {"zone": getattr(s, "zone", ""), "sensor": s.name},
+                    {"raw": float(s.read_raw_value()), "percent": float(s.read_value())},
+                )
+            time.sleep(interval)

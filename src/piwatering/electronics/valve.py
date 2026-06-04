@@ -1,53 +1,70 @@
-from gpiozero import OutputDevice
 import time
-from threading import Thread
+from threading import Thread, Event
+
+from gpiozero import OutputDevice
 
 from db import write
 
 
-class Valve(OutputDevice):
-    def __init__(self, name, pin, active_high=False, initial_value=False):
-        super().__init__(pin, active_high=active_high, initial_value=initial_value)
+class Valve:
+    """A relay-driven valve. `pin=None` => not wired yet (logged, no GPIO)."""
+
+    def __init__(self, name, role="zone", pin=None, active_high=False, initial_value=False):
         self.name = name
+        self.role = role
         self.timer_running = False
+        self.timer_seconds = None       # total duration of the current timer
+        self._timer_ends_at = None      # monotonic clock value when it will close
+        self._timer_stop = Event()
+        self._device = (
+            OutputDevice(pin, active_high=active_high, initial_value=initial_value)
+            if pin is not None else None
+        )
+
+    @property
+    def wired(self):
+        return self._device is not None
+
+    @property
+    def is_open(self):
+        return bool(self._device and self._device.value)
+
+    @property
+    def timer_remaining(self):
+        """Seconds left on the running timer (0 if none)."""
+        if not self.timer_running or self._timer_ends_at is None:
+            return 0
+        return max(0, round(self._timer_ends_at - time.monotonic()))
 
     def open(self):
         write("valve_state", {"valve": self.name}, {"value": 1})
-        print(f'{self.name} opened')
-        self.on()
+        if self._device:
+            self._device.on()
+        print(f"{self.name} opened")
 
     def close(self):
         write("valve_state", {"valve": self.name}, {"value": 0})
-        print(f'{self.name} closed')
-        self.off()
+        if self._device:
+            self._device.off()
+        print(f"{self.name} closed")
 
     def start_timer(self, duration_seconds):
-        if not self.timer_running:
-            timer_thread = Thread(target=self._timer_function, args=(duration_seconds,))
-            timer_thread.start()
+        if self.timer_running:
+            return
+        self.timer_running = True
+        self.timer_seconds = duration_seconds
+        self._timer_ends_at = time.monotonic() + duration_seconds
+        self._timer_stop.clear()
+        Thread(target=self._timer_function, args=(duration_seconds,), daemon=True).start()
+
+    def stop_timer(self):
+        """Cancel a running timer early; the timer thread then closes the valve."""
+        self._timer_stop.set()
 
     def _timer_function(self, duration_seconds):
-        self.timer_running = True
         self.open()
-        time.sleep(duration_seconds)
+        self._timer_stop.wait(duration_seconds)   # wakes early if stop_timer() fired
         self.close()
         self.timer_running = False
-
-    def get_html(self):
-        return f'''
-        <div id="{self.name}">
-            <h2>{self.name}</h2>
-            <form action="/{self.name}/open_valve" method="post">
-                <button type="submit">Open Valve</button>
-            </form>
-            <form action="/{self.name}/close_valve" method="post">
-                <button type="submit">Close Valve</button>
-            </form>
-            <form action="/{self.name}/start_timer" method="post">
-                <label for="{self.name}_duration">Timer Duration (seconds):</label>
-                <input type="number" id="{self.name}_duration" name="duration" required>
-                <button type="submit">Start Timer</button>
-            </form>
-            <hr>
-        </div>
-    '''
+        self.timer_seconds = None
+        self._timer_ends_at = None
