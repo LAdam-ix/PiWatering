@@ -7,10 +7,15 @@ from db import write
 
 
 class Valve:
-    """A relay-driven valve. `pin=None` => not wired yet (logged, no GPIO)."""
+    """A relay-driven valve. `pin=None` => not wired yet (logged, no GPIO).
 
-    def __init__(self, name, role="zone", pin=None, active_high=False, initial_value=False):
-        self.name = name
+    `id` is the immutable machine key (routes, DB label, lookup); `label` is the
+    changeable display name.
+    """
+
+    def __init__(self, id, label, role="zone", pin=None, active_high=False, initial_value=False):
+        self.id = id
+        self.label = label
         self.role = role
         self.timer_running = False
         self.timer_seconds = None       # total duration of the current timer
@@ -37,16 +42,16 @@ class Valve:
         return max(0, round(self._timer_ends_at - time.monotonic()))
 
     def open(self):
-        write("valve_state", {"valve": self.name}, {"value": 1})
+        write("valve_state", {"valve": self.id}, {"value": 1})
         if self._device:
             self._device.on()
-        print(f"{self.name} opened")
+        print(f"{self.id} opened")
 
     def close(self):
-        write("valve_state", {"valve": self.name}, {"value": 0})
+        write("valve_state", {"valve": self.id}, {"value": 0})
         if self._device:
             self._device.off()
-        print(f"{self.name} closed")
+        print(f"{self.id} closed")
 
     def start_timer(self, duration_seconds):
         if self.timer_running:

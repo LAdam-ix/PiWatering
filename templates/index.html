@@ -24,10 +24,10 @@
 <body>
   <header>PiWater · Control</header>
   <div class="wrap">
-    {% for v in garden.zones() %}
-    <div class="valve {% if not v.wired %}unwired{% endif %}" data-valve="{{ v.name }}">
+    {% for v in controller.zones() %}
+    <div class="valve {% if not v.wired %}unwired{% endif %}" data-valve="{{ v.id }}">
       <div class="row">
-        <span class="name">{{ v.name }}</span>
+        <span class="name">{{ v.label }}</span>
         <span class="state">…</span>
       </div>
       <div class="btns">

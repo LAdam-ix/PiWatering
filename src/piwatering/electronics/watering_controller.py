@@ -4,7 +4,7 @@ import time
 from db import write
 
 
-class GardenController:
+class WateringController:
     def __init__(self, log_interval=60):
         self.valves = []
         self.sensors = []           # flat; planned/inactive for now
@@ -14,9 +14,9 @@ class GardenController:
     def add_valve(self, valve):
         self.valves.append(valve)
 
-    def get_valve(self, name):
+    def get_valve(self, valve_id):
         for v in self.valves:
-            if v.name == name:
+            if v.id == valve_id:
                 return v
         return None
 
