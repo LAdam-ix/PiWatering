@@ -1,5 +1,5 @@
 from pathlib import Path
-from config import FLASK_SECRET_KEY
+from config import FLASK_SECRET_KEY, FLASK_PORT
 from flask import Flask, request, redirect, url_for, jsonify, flash
 from electronics.valve import Valve
 from electronics.watering_controller import WateringController
@@ -101,4 +101,4 @@ def valves_status():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=FLASK_PORT)

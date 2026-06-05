@@ -10,3 +10,4 @@ SENSOR_RAW_DRY = float(config.get("SENSOR_RAW_DRY", 0.6))  # ->   0 %
 VM_URL = config.get("VM_URL", "http://localhost:8428")
 
 FLASK_SECRET_KEY = config.get("FLASK_SECRET_KEY", "change-me-in-env")
+FLASK_PORT = int(config.get("FLASK_PORT", 5000))
