@@ -1,0 +1,22 @@
+# Template - on the Pi, replace <USER> and <VM_DIR> with real values,
+# place this file in <VM_DIR>, then enable it (see victoriametrics.md).
+
+[Unit]
+Description=VictoriaMetrics (PiWater time-series DB)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<USER>
+ExecStart=<VM_DIR>/victoria-metrics \
+  -storageDataPath=<VM_DIR>/db \
+  -httpListenAddr=:8428 \
+  -retentionPeriod=100y \
+  -memory.allowedPercent=50 \
+  -inmemoryDataFlushInterval=60s
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
