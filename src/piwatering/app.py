@@ -66,6 +66,22 @@ def stop_timer(valve_id):
     return redirect(url_for("index"))
 
 
+@app.route("/valve/<valve_id>/timer/pause", methods=["POST"])
+def pause_timer(valve_id):
+    v = controller.get_valve(valve_id)
+    if v:
+        v.pause_timer()
+    return redirect(url_for("index"))
+
+
+@app.route("/valve/<valve_id>/timer/resume", methods=["POST"])
+def resume_timer(valve_id):
+    v = controller.get_valve(valve_id)
+    if v:
+        v.resume_timer()
+    return redirect(url_for("index"))
+
+
 @app.route("/valves/status", methods=["GET"])
 def valves_status():
     return jsonify({
@@ -74,6 +90,8 @@ def valves_status():
             "open": v.is_open,
             "wired": v.wired,
             "role": v.role,
+            "timer_running": v.timer_running,
+            "timer_paused": v.timer_paused,
             "timer_remaining": v.timer_remaining,
         }
         for v in controller.valves
