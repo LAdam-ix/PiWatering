@@ -1,11 +1,11 @@
 # VictoriaMetrics setup (Raspberry Pi, arm64)
 
-Self-contained in one folder, `<VM_DIR>` (e.g. `~/.victoriametrics`):
+Self-contained in one folder, `<VM_DIR>` (e.g. `~/.victoria-metrics`):
 
 ```
 <VM_DIR>/
   victoria-metrics            # the binary
-  victoriametrics.service     # the unit (template in this repo)
+  victoria-metrics.service     # the unit (template in this repo)
   db/                         # -storageDataPath (snapshots auto-go to db/snapshots/)
 ```
 
@@ -17,12 +17,12 @@ Self-contained in one folder, `<VM_DIR>` (e.g. `~/.victoriametrics`):
    tar xzf victoria-metrics-linux-arm64-*.tar.gz
    mv victoria-metrics-prod <VM_DIR>/victoria-metrics
    ```
-3. Copy `victoriametrics.service` into `<VM_DIR>` and fill in `<USER>` / `<VM_DIR>`.
+3. Copy `victoria-metrics.service` into `<VM_DIR>` and fill in `<USER>` / `<VM_DIR>`.
 
 ## Run as a service
 ```
-sudo systemctl enable <VM_DIR>/victoriametrics.service   # systemd links it into /etc
-sudo systemctl start victoriametrics
+sudo systemctl enable <VM_DIR>/victoria-metrics.service   # systemd links it into /etc
+sudo systemctl start victoria-metrics
 ```
 Listens on `:8428`. App writes line protocol to `/write`; query via `/api/v1/query`.
 

@@ -1,0 +1,19 @@
+# PiWatering Flask app. On the Pi it's installed as "watering.service".
+# Fill in <USER> and <APP_DIR> (the repo root, e.g. /home/arthur/PIWater), then
+# place/hardlink into /etc/systemd/system/ -> daemon-reload -> enable --now.
+
+[Unit]
+Description=PiWatering
+After=network.target
+
+[Service]
+ExecStart=<APP_DIR>/.venv/bin/python3 <APP_DIR>/src/piwatering/app.py
+Environment="PATH=<APP_DIR>/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+WorkingDirectory=<APP_DIR>
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=<USER>
+
+[Install]
+WantedBy=multi-user.target
