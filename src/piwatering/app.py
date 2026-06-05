@@ -1,14 +1,14 @@
+from pathlib import Path
 from config import FLASK_SECRET_KEY
-from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
+from flask import Flask, request, redirect, url_for, jsonify, flash
 from electronics.valve import Valve
 from electronics.watering_controller import WateringController
 from electronics.pinout import VALVES
 
-app = Flask(__name__, template_folder='./../../templates')
+# Built Svelte SPA (frontend/dist) served as static files
+DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+app = Flask(__name__, static_folder=str(DIST), static_url_path="")
 app.secret_key = FLASK_SECRET_KEY
-
-# Web refresh interval in seconds
-REFRESH_INTERVAL = 2
 
 # Build the flat valve registry from the pinout dict (key = stable id)
 controller = WateringController(30)
@@ -20,7 +20,9 @@ controller.start_monitoring()
 
 @app.route("/")
 def index():
-    return render_template("index.html", refresh_interval=REFRESH_INTERVAL, controller=controller)
+    if (DIST / "index.html").exists():
+        return app.send_static_file("index.html")
+    return "Frontend not built. Run: npm --prefix frontend run build", 200
 
 
 @app.route("/valve/<valve_id>/open", methods=["POST"])

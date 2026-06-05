@@ -1,3 +1,4 @@
+## Number = GPIO Number 
 RELAY1 = 3
 RELAY2 = 2
 RELAY3 = None
