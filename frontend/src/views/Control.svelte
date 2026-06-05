@@ -1,19 +1,29 @@
 <script>
+  import { onDestroy } from 'svelte';
   import ValveCard from '../components/ValveCard.svelte';
   import { status } from '../api.js';
 
   let valves = $state({});
-  async function load() { valves = await status(); }
+  let timer;
 
-  load();
-  setInterval(load, 1000);
+  // Adaptive polling: 1s while a timer is actively counting (smooth countdown),
+  // 5s otherwise. Future automation runs via timers/valve state too, so it
+  // auto-speeds-up whenever something is active.
+  async function tick() {
+    clearTimeout(timer);
+    valves = await status();
+    const active = Object.values(valves).some((v) => v.timer_running && !v.timer_paused);
+    timer = setTimeout(tick, active ? 1000 : 5000);
+  }
+  tick();
+  onDestroy(() => clearTimeout(timer));
 
   let zones = $derived(Object.entries(valves).filter(([, v]) => v.role === 'zone'));
 </script>
 
 <div class="grid">
   {#each zones as [id, v] (id)}
-    <ValveCard {id} valve={v} refresh={load} />
+    <ValveCard {id} valve={v} refresh={tick} />
   {/each}
 </div>
 
