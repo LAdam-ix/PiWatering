@@ -1,5 +1,8 @@
+import logging
 import requests
 from config import VM_URL
+
+log = logging.getLogger("piwater")
 
 # VictoriaMetrics /write endpoint - one DB for the whole app
 WRITE_URL = f"{VM_URL.rstrip('/')}/write"
@@ -23,4 +26,4 @@ def write(measurement, tags, fields, url=None):
     try:
         requests.post(url or WRITE_URL, data=line.encode(), timeout=2)
     except requests.RequestException as e:
-        print(f"metrics write failed: {e}")
+        log.warning("metrics write failed: %s", e)

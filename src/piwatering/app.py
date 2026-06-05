@@ -1,6 +1,9 @@
 from pathlib import Path
 from config import FLASK_SECRET_KEY, FLASK_PORT
+from logging_setup import setup_logging
 from flask import Flask, request, redirect, url_for, jsonify, flash
+
+setup_logging()
 from electronics.valve import Valve
 from electronics.watering_controller import WateringController
 from electronics.pinout import VALVES

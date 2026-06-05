@@ -1,9 +1,12 @@
+import logging
 import time
 from threading import Thread, Event
 
 from gpiozero import OutputDevice
 
 from db import write
+
+log = logging.getLogger("piwater")
 
 
 class Valve:
@@ -50,14 +53,14 @@ class Valve:
         write("valve_state", {"valve": self.id}, {"value": 1})
         if self._device:
             self._device.on()
-        print(f"{self.id} opened")
+        log.info("%s opened", self.id)
 
     def close(self):
         self._open = False
         write("valve_state", {"valve": self.id}, {"value": 0})
         if self._device:
             self._device.off()
-        print(f"{self.id} closed")
+        log.info("%s closed", self.id)
 
     # ---- timer (start / pause / resume / stop) ----
     def start_timer(self, duration_seconds):
