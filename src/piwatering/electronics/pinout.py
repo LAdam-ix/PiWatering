@@ -18,15 +18,15 @@ SELECT=8
 
 # 8-relay board. Valve registry keyed by a STABLE id (never change it - used for
 # routes, DB labels, lookups). `label` is the display name (freely changeable).
-#   pin  = relay channel BCM pin, or None until wired (None = present, not operable)
+#   relay = which relay channel (its BCM pin, e.g. RELAY1), or None until wired
 #   role = "source" (water input: mains/reservoir, act as masters) | "zone" (output)
 VALVES = {
-    "town_mains":   {"pin": None, "role": "source", "label": "Town mains"},
-    "reservoir":    {"pin": None, "role": "source", "label": "Reservoir"},
-    "garden_1":     {"pin": None, "role": "zone",   "label": "Garden 1"},
-    "garden_2":     {"pin": None, "role": "zone",   "label": "Garden 2"},
-    "upper_garden": {"pin": None, "role": "zone",   "label": "Upper garden"},
-    "trees":        {"pin": None, "role": "zone",   "label": "Trees"},
-    "hose":         {"pin": None, "role": "zone",   "label": "Hose"},
-    "grass":        {"pin": None, "role": "zone",   "label": "Grass"},
+    "town_mains":   {"relay": None, "role": "source", "label": "Town mains"},
+    "reservoir":    {"relay": None, "role": "source", "label": "Reservoir"},
+    "garden_1":     {"relay": None, "role": "zone",   "label": "Garden 1"},
+    "garden_2":     {"relay": None, "role": "zone",   "label": "Garden 2"},
+    "upper_garden": {"relay": None, "role": "zone",   "label": "Upper garden"},
+    "trees":        {"relay": None, "role": "zone",   "label": "Trees"},
+    "hose":         {"relay": None, "role": "zone",   "label": "Hose"},
+    "grass":        {"relay": None, "role": "zone",   "label": "Grass"},
 }

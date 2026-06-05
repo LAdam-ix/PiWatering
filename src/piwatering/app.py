@@ -13,7 +13,7 @@ app.secret_key = FLASK_SECRET_KEY
 # Build the flat valve registry from the pinout dict (key = stable id)
 controller = WateringController(30)
 for vid, cfg in VALVES.items():
-    controller.add_valve(Valve(id=vid, label=cfg["label"], role=cfg["role"], pin=cfg["pin"]))
+    controller.add_valve(Valve(id=vid, label=cfg["label"], role=cfg["role"], pin=cfg["relay"]))
 
 controller.start_monitoring()
 
