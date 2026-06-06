@@ -41,7 +41,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "valve_state_value"
+                      "expr": "last_over_time(valve_state_value[1d])"
                     },
                     "version": "v0"
                   },
@@ -425,7 +425,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "valve_state_value",
+                      "expr": "last_over_time(valve_state_value[1d])",
                       "instant": true
                     },
                     "version": "v0"
