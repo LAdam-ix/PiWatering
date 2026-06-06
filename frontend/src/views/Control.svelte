@@ -13,7 +13,7 @@
     clearTimeout(timer);
     valves = await status();
     const active = Object.values(valves).some((v) => v.timer_running && !v.timer_paused);
-    timer = setTimeout(tick, active ? 1000 : 5000);
+    timer = setTimeout(tick, active ? 500 : 5000);
   }
   tick();
   onDestroy(() => clearTimeout(timer));
