@@ -41,7 +41,8 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "last_over_time(valve_state_value[1d])"
+                      "expr": "last_over_time(valve_state_value[1d])",
+                      "legendFormat": "{{valve}}"
                     },
                     "version": "v0"
                   },
@@ -159,7 +160,8 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_raw{zone=\"GRASS\"}"
+                      "expr": "soil_moisture_raw{zone=\"GRASS\"}",
+                      "legendFormat": "{{zone}} {{sensor}}"
                     },
                     "version": "v0"
                   },
@@ -177,7 +179,8 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_raw{zone=\"GARDEN\"}"
+                      "expr": "soil_moisture_raw{zone=\"GARDEN\"}",
+                      "legendFormat": "{{zone}} {{sensor}}"
                     },
                     "version": "v0"
                   },
@@ -292,7 +295,8 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_percent{zone=\"GRASS\"}"
+                      "expr": "soil_moisture_percent{zone=\"GRASS\"}",
+                      "legendFormat": "{{zone}} {{sensor}}"
                     },
                     "version": "v0"
                   },
@@ -310,7 +314,8 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_percent{zone=\"GARDEN\"}"
+                      "expr": "soil_moisture_percent{zone=\"GARDEN\"}",
+                      "legendFormat": "{{zone}} {{sensor}}"
                     },
                     "version": "v0"
                   },
@@ -426,7 +431,8 @@
                     "kind": "DataQuery",
                     "spec": {
                       "expr": "last_over_time(valve_state_value[1d])",
-                      "instant": true
+                      "instant": true,
+                      "legendFormat": "{{valve}}"
                     },
                     "version": "v0"
                   },
