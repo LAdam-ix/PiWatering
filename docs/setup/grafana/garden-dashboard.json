@@ -116,7 +116,10 @@
                       "value": 80
                     }
                   ]
-                }
+                },
+                "min": 0,
+                "max": 1,
+                "decimals": 0
               },
               "overrides": [
                 {
@@ -837,6 +840,6 @@
     "timezone": "browser",
     "to": "now"
   },
-  "title": "Garden System Monitoring",
+  "title": "Watering Monitoring (victoria)",
   "variables": []
 }
