@@ -41,7 +41,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "valve_state"
+                      "expr": "valve_state_value"
                     },
                     "version": "v0"
                   },
@@ -159,7 +159,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_raw{circuit=\"GRASS\"}"
+                      "expr": "soil_moisture_raw{zone=\"GRASS\"}"
                     },
                     "version": "v0"
                   },
@@ -177,7 +177,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_raw{circuit=\"GARDEN\"}"
+                      "expr": "soil_moisture_raw{zone=\"GARDEN\"}"
                     },
                     "version": "v0"
                   },
@@ -292,7 +292,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_percent{circuit=\"GRASS\"}"
+                      "expr": "soil_moisture_percent{zone=\"GRASS\"}"
                     },
                     "version": "v0"
                   },
@@ -310,7 +310,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "soil_moisture_percent{circuit=\"GARDEN\"}"
+                      "expr": "soil_moisture_percent{zone=\"GARDEN\"}"
                     },
                     "version": "v0"
                   },
@@ -425,7 +425,7 @@
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "valve_state",
+                      "expr": "valve_state_value",
                       "instant": true
                     },
                     "version": "v0"
