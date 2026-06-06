@@ -118,7 +118,104 @@
                   ]
                 }
               },
-              "overrides": []
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "town_mains"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "TownMains"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "reservoir"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Reservoir"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "garden_1"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Garden1"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "garden_2"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Garden2"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "upper_garden"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "UpperGarden"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "trees"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Trees"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "hose"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Hose"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "grass"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Grass"
+                    }
+                  ]
+                }
+              ]
             },
             "options": {
               "annotations": {
@@ -469,7 +566,104 @@
                 },
                 "unit": "bool_on_off"
               },
-              "overrides": []
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "town_mains"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "TownMains"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "reservoir"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Reservoir"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "garden_1"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Garden1"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "garden_2"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Garden2"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "upper_garden"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "UpperGarden"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "trees"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Trees"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "hose"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Hose"
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "grass"
+                  },
+                  "properties": [
+                    {
+                      "id": "displayName",
+                      "value": "Grass"
+                    }
+                  ]
+                }
+              ]
             },
             "options": {
               "colorMode": "value",
