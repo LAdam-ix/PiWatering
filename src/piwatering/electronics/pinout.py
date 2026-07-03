@@ -1,11 +1,11 @@
 ## Number = GPIO Number 
-RELAY1 = 3
-RELAY2 = 2
-RELAY3 = None
-RELAY4 = None
+RELAY1 = 2
+RELAY2 = 3
+RELAY3 = 4
+RELAY4 = 27
 RELAY5 = None
 RELAY6 = None
-RELAY7 = 4
+RELAY7 = None
 RELAY8 = None
 
 RED_TEST_LED = 19
@@ -23,10 +23,13 @@ SELECT=8
 VALVES = {
     "town_mains":   {"relay": None, "role": "source", "label": "Town mains"},
     "reservoir":    {"relay": None, "role": "source", "label": "Reservoir"},
-    "garden_1":     {"relay": None, "role": "zone",   "label": "Garden 1"},
+    "garden_1":     {"relay": RELAY4, "role": "zone",   "label": "Garden 1"},
     "garden_2":     {"relay": None, "role": "zone",   "label": "Garden 2"},
     "upper_garden": {"relay": None, "role": "zone",   "label": "Upper garden"},
-    "trees":        {"relay": None, "role": "zone",   "label": "Trees"},
-    "hose":         {"relay": None, "role": "zone",   "label": "Hose"},
-    "grass":        {"relay": None, "role": "zone",   "label": "Grass"},
+    "trees":        {"relay": RELAY1, "role": "zone",   "label": "Trees"},
+    "hose":         {"relay": RELAY2, "role": "zone",   "label": "Hose"},
+    "grass":        {"relay": RELAY3, "role": "zone",   "label": "Grass"},
 }
+
+
+
